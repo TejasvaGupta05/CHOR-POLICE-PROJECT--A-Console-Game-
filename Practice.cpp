@@ -6,7 +6,7 @@
 using std::cout,std::cin,std::endl,std::fill;
 typedef std::string str;
 
-void CreateBoard(int rows, int columns, char *Board);
+void CreateBoard(int rows, int columns, char &Board);
 void ClearBoard(int rows, int columns);
 bool checkGameWon();
 bool checkGameOver();
@@ -15,7 +15,7 @@ int main(){
     srand(getpid());
     bool Running=true;
     char Board[5][5];
-    fill(Board[0],Board[4]+5,'$');
+    fill(Board[0],Board[4]+5,'I');
     for (int i = 0; i < 5; i++)
     {
         for (int j = 0; j < 5; j++)
@@ -25,14 +25,14 @@ int main(){
         cout<<endl;
     }
     
+    CreateBoard(5,5,Board[5][5]);
 
     // cout<<&Board[0];
-    // CreateBoard(5,5,Board);
     
     return 0;
 }
 
-void CreateBoard(int rows, int columns, char *Board){
+void CreateBoard(int rows, int columns, char &Board){
     // cout<<'\n';
     // for (int i = 0; i < rows-1; i++)
     // {
@@ -54,7 +54,7 @@ void CreateBoard(int rows, int columns, char *Board){
     // }
     // cout<<'\b'<<' ';
     // cout<<endl<<endl;
-    // cout<<Board[0][0];
+    cout<<Board;
     // cout<<endl;
     // cout<<' '<<Board[0]<<" | "<<Board[1]<<" | "<<Board[2]<<" | "<<Board[3]<<" | "<<Board[4]<<endl;
     // cout<<"---|---|---|---|---\n";

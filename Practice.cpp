@@ -15,9 +15,12 @@ bool checkGameOver(int playposX, int playposY, int guardposX, int guardposY);
 int main(){
     srand(getpid());
     bool Running=true;
+    char playerMove;
+    char guardMove;
     char Board[5][5];
     bool restricted_Spawn[5][5]={0};
     fill(Board[0],Board[4]+5,' ');
+
     //Defining Position
     int playerPosition_X = rand()%5 , playerPosition_Y = rand()%5; 
     int treasurePosition_X = rand()%5 , treasurePosition_Y = rand()%5;
@@ -43,13 +46,62 @@ int main(){
     while (restricted_Spawn[playerPosition_X][playerPosition_Y]){
         playerPosition_X = rand()%5 , playerPosition_Y = rand()%5;
     }
-        
-    Board[playerPosition_X][playerPosition_Y]='O';
+
     Board[treasurePosition_X][treasurePosition_Y]='$';
     Board[guardPosition_X][guardPosition_Y]='X';
     
-    CreateBoard(5,5,Board);
-    CreateBoard(5,5,restricted_Spawn);
+    cout<<"------------------------------------------------\n";
+    cout<<"         Welcome to Project CHOR POLICE         \n\n";
+    cout<<"Rules for playing the Game ::\n";
+    cout<<"1. The Task of the game is to reach the Treasure($) without being caught by the Guard.\n";
+    cout<<"2. The Gaurd(X) can caught the player(O), if the player is at the adjacent side of Guard.\n\n";
+
+    start:
+    // CreateBoard(5,5,restricted_Spawn);
+    do
+    {
+        Board[playerPosition_X][playerPosition_Y]='O';
+        Board[guardPosition_X][guardPosition_Y]='X';
+        CreateBoard(5,5,Board);
+        Board[playerPosition_X][playerPosition_Y]=' ';
+        Board[guardPosition_X][guardPosition_Y]=' ';
+        cout<<"\nWhich direction you want to go U:UP D:Down L:Left R:Right Q:Quit !\nEnter Your Choice :: ";
+        cin>>playerMove;
+        switch (playerMove)
+        {
+        case 'U':
+        case 'u':
+            if(playerPosition_X>0){playerPosition_X--; cout<<"You Moved Up!!\n";}
+            else{cout<<"You can't move Up\n"; goto start;}
+            break;
+        case 'D':
+        case 'd':
+            if(playerPosition_X<4){playerPosition_X++; cout<<"You Moved Down!!\n";}
+            else{cout<<"You can't move Down\n"; goto start;}
+            break;
+        case 'L':
+        case 'l':
+            if(playerPosition_Y>0){playerPosition_Y--; cout<<"You Moved Left!!\n";}
+            else{cout<<"You can't move Left\n"; goto start;}
+            break;
+        case 'R':
+        case 'r':
+            if(playerPosition_Y<4){playerPosition_Y++; cout<<"You Moved Right!!\n";}
+            else{cout<<"You can't move Right\n"; goto start;}
+            break;
+        case 'Q':
+        case 'q':
+            cout<<"Thanks For Playing!!\n";
+            Running=false;
+            break;
+        default:
+            cout<<"Wrong Choice!! Try Again....\n";
+            goto start;
+            break;
+        }
+    } while (Running && (!checkGameWon(playerPosition_X,playerPosition_Y,treasurePosition_X,treasurePosition_Y) || !checkGameOver(playerPosition_X,playerPosition_Y,guardPosition_X,guardPosition_Y)));
+    
+    
     
     return 0;
 }

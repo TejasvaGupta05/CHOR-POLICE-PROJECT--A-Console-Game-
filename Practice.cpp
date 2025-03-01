@@ -16,7 +16,8 @@ int main(){
     srand(getpid());
     bool Running=true;
     char playerMove;
-    char guardMove;
+    int guardMove;
+    int tempX,tempY;
     char Board[5][5];
     bool restricted_Spawn[5][5]={0};
     fill(Board[0],Board[4]+5,' ');
@@ -99,9 +100,46 @@ int main(){
             goto start;
             break;
         }
-    } while (Running && (!checkGameWon(playerPosition_X,playerPosition_Y,treasurePosition_X,treasurePosition_Y) || !checkGameOver(playerPosition_X,playerPosition_Y,guardPosition_X,guardPosition_Y)));
+
+        if(checkGameWon(playerPosition_X,playerPosition_Y,treasurePosition_X,treasurePosition_Y) || checkGameOver(playerPosition_X,playerPosition_Y,guardPosition_X,guardPosition_Y)) break;
+        
+        while (true)
+        {
+            tempX=guardPosition_X;
+            tempY=guardPosition_Y;
+            guardMove=rand()%4;
+            switch (guardMove)
+            {
+            case 0:
+                guardPosition_X--;
+                break;
+            case 1:
+                guardPosition_X++;
+                break;
+            case 2:
+                guardPosition_Y++;
+                break;
+            case 3:
+                guardPosition_Y--;
+                break;
+            default:
+                break;
+            }
+            if (guardPosition_X<5 && guardPosition_X>=0 && guardPosition_Y<5 && guardPosition_Y>=0 && (guardPosition_X!=treasurePosition_X || guardPosition_Y!=treasurePosition_Y)) 
+            {
+                break;
+            }
+            else{
+                guardPosition_X=tempX;
+                guardPosition_Y=tempY;
+            }
+            
+        }
+        
+
+    } while(Running && (!checkGameWon(playerPosition_X,playerPosition_Y,treasurePosition_X,treasurePosition_Y) && !checkGameOver(playerPosition_X,playerPosition_Y,guardPosition_X,guardPosition_Y)));
     
-    
+    cout<<"------------------------------------------------\n";
     
     return 0;
 }
@@ -155,6 +193,7 @@ void ClearBoard(int rows, int columns){
 bool checkGameWon(int playposX,int playposY,int treposX,int treposY){
     if (playposX==treposX && playposY==treposY)
     {
+        cout<<"Congratulations !! YOU WIN\n";
         return true;
     }
     else{
@@ -166,6 +205,7 @@ bool checkGameWon(int playposX,int playposY,int treposX,int treposY){
 
 bool checkGameOver(int playposX, int playposY, int guardposX, int guardposY){
     if((guardposX==playposX && guardposY==playposY) || (guardposX-1==playposX && guardposY==playposY) || (guardposX+1==playposX && guardposY==playposY) || (guardposX==playposX && guardposY-1==playposY) || (guardposX==playposX && guardposY+1==playposY)){
+        cout<<"YOU LOST!! Better Luck Next Time\n";
         return true;
     }
     return false;

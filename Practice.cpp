@@ -1,8 +1,5 @@
 //Not Stopping till this project is complete....
 #include<iostream>
-#include<algorithm>
-#include<vector>
-#include<ctime>
 
 using std::cout,std::cin,std::endl,std::fill;
 typedef std::string str;
@@ -144,29 +141,7 @@ int main(){
     return 0;
 }
 
-void CreateBoard(int rows, int columns, auto (&Board)[5][5]){
-    // cout<<'\n';
-    // for (int i = 0; i < rows-1; i++)
-    // {
-    //     for (int j = 0; j < columns-1; j++)
-    //     {
-    //         cout<<" "<<Board[i+j]<<" "<<"|";
-    //     }
-    //     cout<<'\b'<<endl;
-    //     for (int j = 0; j < columns-1; j++)
-    //     {
-    //         cout<<"---|";
-    //     }
-    //     cout<<"---";
-    //     cout<<'\b'<<endl;        
-    // }
-    // for (int  i = 0; i < columns; i++)
-    // {
-    //     cout<<" "<<Board[rows-1+i]<<" "<<"|";
-    // }
-    // cout<<'\b'<<' ';
-    // cout<<endl<<endl;
-    
+void CreateBoard(int rows, int columns, auto (&Board)[5][5]){    
     cout<<endl;
     cout<<' '<<Board[0][0]<<" | "<<Board[0][1]<<" | "<<Board[0][2]<<" | "<<Board[0][3]<<" | "<<Board[0][4]<<endl;
     cout<<"---|---|---|---|---\n";

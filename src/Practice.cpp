@@ -7,6 +7,7 @@
 #define SCREEN_HEIGHT 500
 
 Color OpaqueGray = {240,240,240,250};
+Color OpaqueRed = {255,161,0,161};
 
 void CreateBoard(int TposX,int TposY,int PposX,int PposY,int GposX,int GposY);
 bool checkGameWon(int playposX,int playposY,int treposX,int treposY);
@@ -16,7 +17,6 @@ bool EndBox();
 
 int main(){
     srand(time(NULL));
-    bool restricted_Spawn[5][5]={0};
     bool playermoved=false;
     bool Restart=false;
     InitWindow(SCREEN_WIDTH,SCREEN_HEIGHT,"PROJECT");
@@ -24,6 +24,7 @@ int main(){
    
     start:
         Restart=false;
+        bool restricted_Spawn[5][5]={0};
         //Defining Position
         int playerPosition_X = rand()%5 , playerPosition_Y = rand()%5; 
         int treasurePosition_X = rand()%5 , treasurePosition_Y = rand()%5;
@@ -39,19 +40,16 @@ int main(){
             }        
         }
 
-
         //Changing Guard Position until it spawns near Treasure
         while (!restricted_Spawn[guardPosition_X][guardPosition_Y] || (guardPosition_X==treasurePosition_X && guardPosition_Y==treasurePosition_Y)){
             guardPosition_X = rand()%5 , guardPosition_Y = rand()%5;
         }
-
 
         //Assigning restricted spawn true for guard POV
         if(guardPosition_X+1<5) restricted_Spawn[guardPosition_X+1][guardPosition_Y]=true;
         if(guardPosition_X-1>=0) restricted_Spawn[guardPosition_X-1][guardPosition_Y]=true;
         if(guardPosition_Y+1<5) restricted_Spawn[guardPosition_X][guardPosition_Y+1]=true;
         if(guardPosition_Y-1>=0) restricted_Spawn[guardPosition_X][guardPosition_Y-1]=true;
-
 
         //Changing Player Position until spawned away from the treasure and guard
         while (restricted_Spawn[playerPosition_X][playerPosition_Y]){
@@ -87,6 +85,8 @@ int main(){
                 playerPosition_X++;
                 playermoved=true;
             }
+            else if (IsKeyPressed(KEY_F)) playermoved=true;
+                        
             check:
             if(checkGameOver(playerPosition_X,playerPosition_Y,guardPosition_X,guardPosition_Y)){
                 Restart=EndBox();
@@ -115,9 +115,14 @@ void CreateBoard(int TposX,int TposY,int PposX,int PposY,int GposX,int GposY){
         DrawLine(i*100,0,i*100,SCREEN_HEIGHT,BLACK);
         DrawLine(0,(i*100)+SCREEN_HEIGHT-500,SCREEN_WIDTH,(i*100)+SCREEN_HEIGHT-500,BLACK);
     }
-    DrawCircle((TposX*100)+SCREEN_WIDTH-450,(TposY*100)+SCREEN_HEIGHT-450,10,YELLOW);
-    DrawCircle((PposX*100)+SCREEN_WIDTH-450,(PposY*100)+SCREEN_HEIGHT-450,10,GREEN);
-    DrawCircle((GposX*100)+SCREEN_WIDTH-450,(GposY*100)+SCREEN_HEIGHT-450,10,RED);
+    
+    DrawCircle(((GposX+1)*100)+SCREEN_WIDTH-450,(GposY*100)+SCREEN_HEIGHT-450,3,OpaqueRed);
+    DrawCircle(((GposX-1)*100)+SCREEN_WIDTH-450,(GposY*100)+SCREEN_HEIGHT-450,3,OpaqueRed);
+    DrawCircle((GposX*100)+SCREEN_WIDTH-450,((GposY-1)*100)+SCREEN_HEIGHT-450,3,OpaqueRed);
+    DrawCircle((GposX)*100+SCREEN_WIDTH-450,((GposY+1)*100)+SCREEN_HEIGHT-450,3,OpaqueRed);
+    DrawCircle((TposX*100)+SCREEN_WIDTH-450,(TposY*100)+SCREEN_HEIGHT-450,12,YELLOW);
+    DrawCircle((PposX*100)+SCREEN_WIDTH-450,(PposY*100)+SCREEN_HEIGHT-450,12,GREEN);
+    DrawCircle((GposX*100)+SCREEN_WIDTH-450,(GposY*100)+SCREEN_HEIGHT-450,12,RED);
 }
 
 bool checkGameWon(int playposX,int playposY,int treposX,int treposY){
@@ -178,7 +183,7 @@ bool EndBox(){
     int mouseX=GetMouseX(),mouseY=GetMouseY();
     bool clicked;
     DrawRectangle(150,175+SCREEN_HEIGHT-500,200,150,OpaqueGray);
-    if(pow(mouseX-250,2)+pow(mouseY-285-SCREEN_HEIGHT+500,2)<pow(25,2) && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    if((pow(mouseX-250,2)+pow(mouseY-285-SCREEN_HEIGHT+500,2)<pow(25,2) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) || IsKeyDown(KEY_ENTER))
     {
         DrawCircle(250,285+SCREEN_HEIGHT-500,25,LIGHTGRAY);
         clicked=true;

@@ -3,9 +3,8 @@
 #include<ctime>
 #include<cmath>
 
-
 #define SCREEN_WIDTH 500
-#define SCREEN_HEIGHT 500
+#define SCREEN_HEIGHT 550
 
 Color OpaqueGray = {240,240,240,250};
 Color OpaqueRed = {255,161,0,161};
@@ -14,7 +13,7 @@ void CreateBoard(int TposX,int TposY,int PposX,int PposY,int GposX,int GposY, in
 bool checkGameWon(int playposX,int playposY,int treposX,int treposY, bool hasKey);
 bool checkGameOver(int playposX, int playposY, int guardposX, int guardposY);
 void guardMove(int &GposX,int &GposY,int TposX,int TposY);
-bool EndBox();
+bool EndBox(Image ArrowHead);
 
 int main(){
     srand(time(NULL));
@@ -23,8 +22,8 @@ int main(){
     InitWindow(SCREEN_WIDTH,SCREEN_HEIGHT,"PROJECT");
     InitAudioDevice();
     Sound clickSound = LoadSound("resources/click.wav");
+    Image ArrowHead = LoadImage("resources/ArrowHead.png");
     SetTargetFPS(60);
-   
     start:
         Restart=false;
         bool restricted_Spawn[5][5]={0};
@@ -34,7 +33,6 @@ int main(){
         int guardPosition_X = rand()%5, guardPosition_Y = rand()%5;
         int keyPosition_X, keyPosition_Y;
         bool keyActive, hasKey;
-
 
         //Assigning restricted spawn true for Treasure POV
         for (int i = treasurePosition_X-1; i < treasurePosition_X+2; i++){
@@ -74,12 +72,13 @@ int main(){
         while (!WindowShouldClose())
         {
             EndDrawing();
-
             playermoved=false;
             if(Restart) break;
             BeginDrawing();
             ClearBackground(WHITE);
             CreateBoard(treasurePosition_X,treasurePosition_Y,playerPosition_X,playerPosition_Y,guardPosition_X,guardPosition_Y, keyPosition_X, keyPosition_Y, keyActive, hasKey);
+            
+            // Handle keyboard input
             if ((IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) && playerPosition_Y>0)
             {
                 playerPosition_Y--; PlaySound(clickSound);
@@ -107,16 +106,25 @@ int main(){
                 hasKey = true;
                 keyActive = false;
             }
+            
+            // Handle mouse click on restart button
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                Vector2 mousePos = GetMousePosition();
+                if (CheckCollisionPointCircle(mousePos, (Vector2){460, 25}, 15)) {
+                    Restart = true;
+                    PlaySound(clickSound);
+                }
+            }
                         
             check:
             if(checkGameOver(playerPosition_X,playerPosition_Y,guardPosition_X,guardPosition_Y)){
-                Restart=EndBox();
-                DrawText("YOU LOSE!!",(SCREEN_WIDTH/2)-80,(SCREEN_HEIGHT/2)-45,30,BLACK); 
+                Restart=EndBox(ArrowHead);
+                DrawText("YOU LOSE!!",(SCREEN_WIDTH/2)-80,(SCREEN_HEIGHT-500+500/2)-45,30,BLACK); 
                 continue;
             }
             else if(checkGameWon(playerPosition_X,playerPosition_Y,treasurePosition_X,treasurePosition_Y, hasKey)){
-                Restart=EndBox();
-                DrawText("YOU WIN!!",(SCREEN_WIDTH/2)-70,(SCREEN_HEIGHT/2)-45,30,BLACK);
+                Restart=EndBox(ArrowHead);
+                DrawText("YOU WIN!!",(SCREEN_WIDTH/2)-70,(SCREEN_HEIGHT-500+500/2)-45,30,BLACK);
                 continue; 
             }
 
@@ -138,7 +146,6 @@ void CreateBoard(int TposX,int TposY,int PposX,int PposY,int GposX,int GposY, in
         DrawLine(i*100,0,i*100,SCREEN_HEIGHT,BLACK);
         DrawLine(0,(i*100)+SCREEN_HEIGHT-500,SCREEN_WIDTH,(i*100)+SCREEN_HEIGHT-500,BLACK);
     }
-    
     DrawCircle(((GposX+1)*100)+SCREEN_WIDTH-450,(GposY*100)+SCREEN_HEIGHT-450,3,OpaqueRed);
     DrawCircle(((GposX-1)*100)+SCREEN_WIDTH-450,(GposY*100)+SCREEN_HEIGHT-450,3,OpaqueRed);
     DrawCircle((GposX*100)+SCREEN_WIDTH-450,((GposY-1)*100)+SCREEN_HEIGHT-450,3,OpaqueRed);
@@ -146,6 +153,30 @@ void CreateBoard(int TposX,int TposY,int PposX,int PposY,int GposX,int GposY, in
     DrawCircle((TposX*100)+SCREEN_WIDTH-450,(TposY*100)+SCREEN_HEIGHT-450,12,YELLOW);
     DrawCircle((PposX*100)+SCREEN_WIDTH-450,(PposY*100)+SCREEN_HEIGHT-450,12,GREEN);
     DrawCircle((GposX*100)+SCREEN_WIDTH-450,(GposY*100)+SCREEN_HEIGHT-450,12,RED);
+    DrawRectangle(0,0,500,50,SKYBLUE);    
+       
+        // Draw menu button (hamburger icon)
+        DrawRectangle(15, 15, 25, 2, WHITE);
+        DrawRectangle(15, 25, 25, 2, WHITE);
+        DrawRectangle(15, 35, 25, 2, WHITE);
+    
+        bool hoverInfo = CheckCollisionPointCircle(GetMousePosition(), (Vector2){400, 25}, 15);
+        Color infoColor = hoverInfo ? LIGHTGRAY : WHITE;
+        DrawText("?", 395, 13, 24, WHITE);
+    
+        // New minimalist restart button
+        bool hoverRestart = CheckCollisionPointCircle(GetMousePosition(), (Vector2){460,25}, 15);
+        Color arrowColor = hoverRestart ? SKYBLUE : DARKGRAY;  // Change color on hover
+        float rotation = hoverRestart ? GetTime()*100 : 0;      // Rotate only on hover
+    
+        // Draw circular arrow
+        DrawRing((Vector2){460,25}, 10, 12, rotation, rotation+270, 20, infoColor);
+        DrawTriangle(
+            (Vector2){460 + sin(DEG2RAD*(rotation+270))*18, 25 + cos(DEG2RAD*(rotation+270))*18},
+            (Vector2){460 + sin(DEG2RAD*(rotation+240))*18, 25 + cos(DEG2RAD*(rotation+240))*18},
+            (Vector2){460 + sin(DEG2RAD*(rotation+300))*18, 25 + cos(DEG2RAD*(rotation+300))*18},
+            infoColor
+        );
     
     if (keyActive) {
         Vector2 keyPos = {(KposX*100) + SCREEN_WIDTH-450, (KposY*100) + SCREEN_HEIGHT-450};
@@ -157,12 +188,19 @@ void CreateBoard(int TposX,int TposY,int PposX,int PposY,int GposX,int GposY, in
     // Collected key indicator
     if (hasKey) {
         Vector2 playerPos = {(PposX*100) + SCREEN_WIDTH-450, (PposY*100) + SCREEN_HEIGHT-450};
-        
-        // Simple key icon
         DrawCircleV({playerPos.x + 20, playerPos.y - 20}, 5, GOLD);
         DrawRectangleV({playerPos.x + 15, playerPos.y - 18}, {10, 4}, GOLD);
     }
 
+    if(hoverInfo) {
+        DrawRectangle(340, 45, 150, 90, WHITE);
+        DrawRectangleLines(340, 45, 150, 90, DARKGRAY);
+        DrawText("Color Legend:", 345, 50, 12, BLACK);
+        DrawText("Green  - Player", 345, 70, 12, BLACK);
+        DrawText("Red    - Guard", 345, 85, 12, BLACK);
+        DrawText("Yellow - Treasure", 345, 100, 12, BLACK);
+        DrawText("Gold   - Key", 345, 115, 12, BLACK);
+    }
 }
 
 bool checkGameWon(int playposX,int playposY,int treposX,int treposY, bool hasKey){
@@ -197,8 +235,7 @@ void guardMove(int &GposX,int &GposY,int TposX,int TposY){
             case 3:
                 GposY--;
                 break;
-            default:
-                break;
+            default: break;
             }
             if (GposX<5 && GposX>=0 && GposY<5 && GposY>=0 && (GposX!=TposX || GposY!=TposY)) 
             {
@@ -211,20 +248,21 @@ void guardMove(int &GposX,int &GposY,int TposX,int TposY){
         }
 }
 
-bool EndBox(){
+bool EndBox(Image ArrowHead){
     int mouseX=GetMouseX(),mouseY=GetMouseY();
     bool clicked = false;
-    DrawRectangle(150,175+SCREEN_HEIGHT-500,200,150,OpaqueGray);
+    float UpBarheight=SCREEN_HEIGHT-500;
+    DrawRectangle(150,175+UpBarheight,200,150,OpaqueGray);
     if((pow(mouseX-250,2)+pow(mouseY-285-SCREEN_HEIGHT+500,2)<pow(25,2) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) || IsKeyPressed(KEY_ENTER))
     {
         clicked=true;
     }
     if(pow(mouseX-250,2)+pow(mouseY-285-SCREEN_HEIGHT+500,2)<pow(25,2))
     {
-        DrawCircle(250,285+SCREEN_HEIGHT-500,25,{245,245,245,255});
+        DrawCircle(250,285+UpBarheight,25,{245,245,245,255});
     }
-    else DrawCircle(250,285+SCREEN_HEIGHT-500,25,WHITE);
-    DrawRing({250,285+SCREEN_HEIGHT-500},12,14,0,270,20,BLACK);
-    DrawTriangleLines({248, 276}, {248, 268}, {255, 272}, BLACK);
+    else DrawCircle(250,285+UpBarheight,25,WHITE);
+    DrawRing({250,285+UpBarheight},12,14,0,270,20,BLACK);
+    DrawTriangle((Vector2){248, 276+UpBarheight},(Vector2){248, 268+UpBarheight},(Vector2){255, 272+UpBarheight}, BLACK);
     return clicked;
 }
